@@ -1,132 +1,48 @@
-#
-# NOTE! Don't add files that are generated in specific
-# subdirectories here. Add them in the ".gitignore" file
-# in that subdirectory instead.
-#
-# NOTE! Please use 'git ls-files -i --exclude-standard'
-# command after changing this file, to see if there are
-# any tracked files which get ignored after the change.
-#
-# Normal rules (sorted alphabetically)
-#
-.*
-*.a
-*.bin
-*.bz2
-*.c.[012]*.*
-*.dtb
-*.dtb.S
-*.dwo
-*.elf
-*.gcno
-*.gz
-*.i
-*.ko
-*.ll
-*.lst
-*.lz4
-*.lzma
-*.lzo
-*.mod.c
+# Build outputs
+out/
 *.o
-*.o.*
-*.order
-*.patch
-*.s
+*.ko
+*.cmd
+*.d
+.*.d
+*.a
 *.so
-*.so.dbg
-*.su
-*.symtypes
-*.tar
-*.xz
-Module.symvers
+*.mod.c
+*.i
+*.s
+*.order
+*.symvers
+*.tmp_versions/
 modules.builtin
+Module.symvers
 
-#
-# Top-level generic files
-#
-/tags
-/TAGS
-/linux
-/vmlinux
-/vmlinux.32
-/vmlinux-gdb.py
-/vmlinuz
-/System.map
-/Module.markers
+# Compiled kernel
+*.img
+*.gz
+Image
+Image.gz
+Image.gz-dtb
+zImage
+vmlinux
+vmlinux.o
+System.map
+.version
 
-#
-# RPM spec file (make rpm-pkg)
-#
-/*.spec
+# ZIP files
+*.zip
 
-#
-# Debian directory (make deb-pkg)
-#
-/debian/
+# Build logs
+build.log
+*.log
 
-#
-# tar directory (make tar*-pkg)
-#
-/tar-install/
-
-#
-# git files that we don't want to ignore even if they are dot-files
-#
-!.gitignore
-!.mailmap
-!.cocciconfig
-!.clang-format
-
-#
-# Generated include files
-#
-include/config
-include/generated
-arch/*/include/generated
-
-# stgit generated dirs
-patches-*
-
-# quilt's files
-patches
-series
-
-# cscope files
-cscope.*
-ncscope.*
-
-# gnu global files
-GPATH
-GRTAGS
-GSYMS
-GTAGS
-
-# id-utils files
-ID
-
+# Editor/IDE files
+*.swp
+*.swo
 *~
-\#*#
+.vscode/
+.idea/
+*.kate-swp
 
-#
-# Leavings from module signing
-#
-extra_certificates
-signing_key.pem
-signing_key.priv
-signing_key.x509
-x509.genkey
-
-# Kconfig presets
-all.config
-
-# Kdevelop4
-*.kdev4
-
-# fetched Android config fragments
-kernel/configs/android-*.cfg
-
-#
-#Ignoring Android.bp link file
-#
-Android.bp
+# Temporary files
+*.tmp
+.tmp_*
