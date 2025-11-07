@@ -17,7 +17,7 @@ if [[ ! " ${ALLOWED_CODENAMES[@]} " =~ " ${DEVICE} " ]]; then
     exit 1
 fi
 
-ZIPNAME="splidder-${DEVICE}-$(date '+%Y%m%d-%H%M').zip"
+ZIPNAME="splidder-KSU-${DEVICE}-$(date '+%Y%m%d-%H%M').zip"
 
 export ARCH=arm64
 export KBUILD_BUILD_USER=build-user
