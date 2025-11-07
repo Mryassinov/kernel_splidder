@@ -46,3 +46,4 @@ build.log
 # Temporary files
 *.tmp
 .tmp_*
+*.zip
