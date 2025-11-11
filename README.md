@@ -56,4 +56,3 @@ Builds are triggered automatically on push, or you can trigger manually from the
 ## 📜 License
 
 GPL-2.0
-# Test change
