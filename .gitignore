@@ -130,3 +130,19 @@ kernel/configs/android-*.cfg
 #Ignoring Android.bp link file
 #
 Android.bp
+# Build outputs
+out/
+*.zip
+build.log
+*.o
+*.ko
+*.mod.c
+*.order
+*.symvers
+*.cmd
+.tmp_versions/
+
+# Editor files
+*.swp
+*.swo
+*~
