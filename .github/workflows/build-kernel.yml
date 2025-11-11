@@ -1,0 +1,153 @@
+name: Build Kernel
+
+on:
+  push:
+    branches:
+      - a16-KSU-Next
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+  pull_request:
+    branches:
+      - a16-KSU-Next
+  workflow_dispatch:
+    inputs:
+      device:
+        description: 'Device codename'
+        required: true
+        default: 'sweet'
+        type: choice
+        options:
+          - sweet
+          - tucana
+          - toco
+          - phoenix
+          - davinci
+
+jobs:
+  build:
+    name: Build Kernel for ${{ github.event.inputs.device || 'sweet' }}
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout kernel source
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+    
+    - name: Setup build environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          bc bison build-essential ccache curl flex \
+          g++-multilib gcc-multilib git gnupg gperf \
+          imagemagick lib32ncurses5-dev lib32readline-dev \
+          lib32z1-dev liblz4-tool libncurses5 libncurses5-dev \
+          libsdl1.2-dev libssl-dev libxml2 libxml2-utils \
+          lzop pngcrush rsync schedtool squashfs-tools \
+          xsltproc zip zlib1g-dev python3 python-is-python3 \
+          libarchive-tools
+    
+    - name: Setup ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ runner.os }}-kernel-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-kernel-
+    
+    - name: Download Clang toolchain
+      run: |
+        mkdir -p ~/evo16/prebuilts/clang/host/linux-x86
+        cd ~/evo16/prebuilts/clang/host/linux-x86
+        wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz
+        mkdir -p clang-r547379
+        tar -xzf clang-r547379.tar.gz -C clang-r547379
+        rm clang-r547379.tar.gz
+    
+    - name: Get device codename
+      id: device
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "device=${{ github.event.inputs.device }}" >> $GITHUB_OUTPUT
+        else
+          echo "device=sweet" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Build kernel
+      run: |
+        export PATH="$HOME/evo16/prebuilts/clang/host/linux-x86/clang-r547379/bin:$PATH"
+        export USE_CCACHE=1
+        export CCACHE_DIR=~/.ccache
+        echo "${{ steps.device.outputs.device }}" | ./build.sh
+    
+    - name: Get kernel info
+      id: kernel_info
+      run: |
+        KERNEL_VERSION=$(cat Makefile | grep "^VERSION = " | cut -d' ' -f3)
+        PATCHLEVEL=$(cat Makefile | grep "^PATCHLEVEL = " | cut -d' ' -f3)
+        SUBLEVEL=$(cat Makefile | grep "^SUBLEVEL = " | cut -d' ' -f3)
+        echo "version=${KERNEL_VERSION}.${PATCHLEVEL}.${SUBLEVEL}" >> $GITHUB_OUTPUT
+        
+        ZIP_NAME=$(ls splidder-ksun-*.zip | head -1)
+        echo "zip_name=${ZIP_NAME}" >> $GITHUB_OUTPUT
+        
+        KSU_VERSION=$(grep "KernelSU-Next version:" out/.config 2>/dev/null | cut -d: -f2 | tr -d ' ' || echo "unknown")
+        echo "ksu_version=${KSU_VERSION}" >> $GITHUB_OUTPUT
+    
+    - name: Upload kernel zip
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.kernel_info.outputs.zip_name }}
+        path: splidder-ksun-*.zip
+        retention-days: 30
+    
+    - name: Upload build log
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-log-${{ steps.device.outputs.device }}
+        path: build.log
+        retention-days: 7
+    
+    - name: Create release on tag
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: splidder-ksun-*.zip
+        body: |
+          ## Kernel Splidder with KernelSU-Next
+          
+          **Device**: ${{ steps.device.outputs.device }}
+          **Kernel Version**: ${{ steps.kernel_info.outputs.version }}
+          **KernelSU-Next**: ${{ steps.kernel_info.outputs.ksu_version }}
+          
+          ### Installation
+          1. Boot to TWRP/OrangeFox recovery
+          2. Flash the zip
+          3. Wipe Dalvik/Cache
+          4. Reboot
+          5. Install KernelSU Manager
+          
+          ### Changelog
+          - See commit history for details
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Post build summary
+      if: always()
+      run: |
+        echo "### Build Summary 🚀" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Device**: ${{ steps.device.outputs.device }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Kernel**: ${{ steps.kernel_info.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **KernelSU-Next**: ${{ steps.kernel_info.outputs.ksu_version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Output**: ${{ steps.kernel_info.outputs.zip_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ -f "splidder-ksun-*.zip" ]; then
+          echo "✅ Build completed successfully!" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Build failed!" >> $GITHUB_STEP_SUMMARY
+        fi
