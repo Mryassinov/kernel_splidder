@@ -130,3 +130,16 @@ kernel/configs/android-*.cfg
 #Ignoring Android.bp link file
 #
 Android.bp
+
+# Build artifacts
+out/
+*.zip
+splidder-*.zip
+
+# Temporary files
+*.o
+*.ko
+*.mod.c
+.tmp_versions/
+modules.order
+Module.symvers
