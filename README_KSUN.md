@@ -98,3 +98,23 @@ This project follows the same license as the Linux kernel (GPL-2.0).
 
 ⚠️ **Warning**: Flashing custom kernels may void your warranty and can brick your device if done incorrectly. Proceed at your own risk. Always maintain backups.
 
+
+## Build Scripts
+
+Two build scripts are available:
+
+### build.sh (Simple)
+Basic build script with essential features:
+```bash
+./build.sh              # Normal build
+./build.sh -c           # Clean build
+```
+
+### kernel_build_script.sh (Enhanced)
+Advanced build script with full features:
+```bash
+./kernel_build_script.sh -h    # Show all options
+./kernel_build_script.sh -c    # Clean build with colors
+./kernel_build_script.sh -v    # Verbose output
+./kernel_build_script.sh -j 16 # Custom thread count
+```
