@@ -2974,7 +2974,8 @@ static int check_helper_call(struct bpf_verifier_env *env, int func_id, int insn
 		fn = env->ops->get_func_proto(func_id, env->prog);
 
 	if (!fn) {
-		verbose(env, "unknown func %s#%d\n", func_id_name(func_id), func_id);
+		if (env->log.level > 1)
+         verbose(env, "unknown func %s#%d\n", func_id_name(func_id), func_id);
 		return -EINVAL;
 	}
 
