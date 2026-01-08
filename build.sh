@@ -53,7 +53,7 @@ echo -e "\nKernel compiled successfully! Zipping up...\n"
 if [ -d "$AK3_DIR" ]; then
 	cp -r $AK3_DIR AnyKernel3
 else
-	if ! git clone -q https://github.com/mikoker/AnyKernel3 -b master AnyKernel3; then
+	if ! git clone -q https://github.com/Mryassinov/AnyKernel3-Splidder -b master AnyKernel3; then
 		echo -e "\nAnyKernel3 repo not found locally and couldn't clone from GitHub! Aborting..."
 		exit 1
 	fi
